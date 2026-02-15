@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AjayCuts - Book Your Appointment</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f0f0f; color: #fff; min-height: 100vh; }
+  .container { max-width: 480px; margin: 0 auto; padding: 20px; }
+  h1 { text-align: center; font-size: 2rem; margin-bottom: 8px; letter-spacing: 2px; }
+  .subtitle { text-align: center; color: #888; margin-bottom: 32px; font-size: 0.9rem; }
+  .step { display: none; }
+  .step.active { display: block; }
+  .step-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; color: #d4af37; }
+  .service-card { background: #1a1a1a; border: 2px solid #333; border-radius: 12px; padding: 18px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s; }
+  .service-card:hover, .service-card.selected { border-color: #d4af37; background: #1f1a0e; }
+  .service-card .name { font-weight: 600; font-size: 1.05rem; }
+  .service-card .duration { color: #999; font-size: 0.85rem; margin-top: 4px; }
+  input[type="date"], input[type="text"], input[type="tel"] {
+    width: 100%; padding: 14px; border-radius: 10px; border: 2px solid #333;
+    background: #1a1a1a; color: #fff; font-size: 1rem; margin-bottom: 12px;
+  }
+  input:focus { outline: none; border-color: #d4af37; }
+  .slots-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+  .slot-btn { padding: 12px 8px; border-radius: 10px; border: 2px solid #333; background: #1a1a1a; color: #fff; font-size: 0.95rem; cursor: pointer; transition: all 0.2s; text-align: center; }
+  .slot-btn:hover, .slot-btn.selected { border-color: #d4af37; background: #1f1a0e; color: #d4af37; }
+  .btn { width: 100%; padding: 16px; border-radius: 12px; border: none; font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 12px; }
+  .btn-primary { background: #d4af37; color: #000; }
+  .btn-primary:hover { background: #e5c54a; }
+  .btn-primary:disabled { background: #555; color: #999; cursor: not-allowed; }
+  .btn-back { background: transparent; color: #888; border: 1px solid #333; margin-top: 8px; }
+  .btn-back:hover { color: #fff; border-color: #666; }
+  .confirmation { text-align: center; padding: 40px 0; }
+  .confirmation .check { font-size: 3rem; margin-bottom: 16px; }
+  .confirmation h2 { margin-bottom: 12px; }
+  .confirmation .details { background: #1a1a1a; border-radius: 12px; padding: 20px; margin: 20px 0; text-align: left; }
+  .confirmation .details p { margin-bottom: 8px; color: #ccc; }
+  .confirmation .details span { color: #fff; font-weight: 600; }
+  .no-slots { text-align: center; color: #888; padding: 30px; }
+  .loading { text-align: center; color: #888; padding: 20px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>AJAYCUTS</h1>
+  <p class="subtitle">Book your appointment</p>
+
+  <!-- Step 1: Pick Service -->
+  <div class="step active" id="step-service">
+    <p class="step-title">Select a service</p>
+    <div id="services-list"></div>
+  </div>
+
+  <!-- Step 2: Pick Date -->
+  <div class="step" id="step-date">
+    <p class="step-title">Choose a date</p>
+    <input type="date" id="date-input">
+    <button class="btn btn-primary" id="date-next-btn" disabled>Continue</button>
+    <button class="btn btn-back" onclick="goToStep('step-service')">Back</button>
+  </div>
+
+  <!-- Step 3: Pick Time -->
+  <div class="step" id="step-time">
+    <p class="step-title">Pick a time</p>
+    <div id="slots-container"></div>
+    <button class="btn btn-primary" id="time-next-btn" disabled>Continue</button>
+    <button class="btn btn-back" onclick="goToStep('step-date')">Back</button>
+  </div>
+
+  <!-- Step 4: Details -->
+  <div class="step" id="step-details">
+    <p class="step-title">Your details</p>
+    <input type="text" id="name-input" placeholder="Your name" required>
+    <input type="tel" id="phone-input" placeholder="Phone number" required>
+    <div id="booking-summary" style="background:#1a1a1a;border-radius:10px;padding:14px;margin-bottom:12px;color:#ccc;font-size:0.9rem;"></div>
+    <button class="btn btn-primary" id="confirm-btn">Confirm Booking</button>
+    <button class="btn btn-back" onclick="goToStep('step-time')">Back</button>
+  </div>
+
+  <!-- Step 5: Confirmation -->
+  <div class="step" id="step-confirm">
+    <div class="confirmation">
+      <div class="check">&#10003;</div>
+      <h2>Booking Confirmed!</h2>
+      <div class="details" id="confirm-details"></div>
+      <button class="btn btn-primary" onclick="location.reload()">Book Another</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let services = [];
+let selectedService = null;
+let selectedDate = null;
+let selectedTime = null;
+
+const API = '';
+
+function goToStep(stepId) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById(stepId).classList.add('active');
+}
+
+// Step 1: Load services
+async function loadServices() {
+  const res = await fetch(API + '/api/services');
+  services = await res.json();
+  const list = document.getElementById('services-list');
+  list.innerHTML = '';
+  services.forEach(svc => {
+    const card = document.createElement('div');
+    card.className = 'service-card';
+    card.innerHTML = `<div class="name">${svc.name}</div><div class="duration">${svc.duration} minutes</div>`;
+    card.onclick = () => {
+      document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedService = svc;
+      goToStep('step-date');
+    };
+    list.appendChild(card);
+  });
+}
+
+// Step 2: Date picker
+const dateInput = document.getElementById('date-input');
+const today = new Date();
+const todayStr = today.toISOString().split('T')[0];
+dateInput.min = todayStr;
+dateInput.addEventListener('change', () => {
+  selectedDate = dateInput.value;
+  document.getElementById('date-next-btn').disabled = !selectedDate;
+});
+document.getElementById('date-next-btn').addEventListener('click', () => {
+  if (selectedDate) loadSlots();
+});
+
+// Step 3: Load available slots
+async function loadSlots() {
+  const container = document.getElementById('slots-container');
+  container.innerHTML = '<div class="loading">Loading available times...</div>';
+  goToStep('step-time');
+  selectedTime = null;
+  document.getElementById('time-next-btn').disabled = true;
+
+  const res = await fetch(API + `/api/availability/${selectedDate}?service=${encodeURIComponent(selectedService.name)}`);
+  const data = await res.json();
+
+  if (!data.available_slots || data.available_slots.length === 0) {
+    container.innerHTML = '<div class="no-slots">No available slots for this date. Please try another day.</div>';
+    return;
+  }
+
+  container.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className = 'slots-grid';
+  data.available_slots.forEach(slot => {
+    const btn = document.createElement('button');
+    btn.className = 'slot-btn';
+    btn.textContent = slot;
+    btn.onclick = () => {
+      document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedTime = slot;
+      document.getElementById('time-next-btn').disabled = false;
+    };
+    grid.appendChild(btn);
+  });
+  container.appendChild(grid);
+}
+
+document.getElementById('time-next-btn').addEventListener('click', () => {
+  if (selectedTime) {
+    document.getElementById('booking-summary').innerHTML =
+      `<strong>${selectedService.name}</strong> &mdash; ${selectedDate} at ${selectedTime}`;
+    goToStep('step-details');
+  }
+});
+
+// Step 4: Confirm booking
+document.getElementById('confirm-btn').addEventListener('click', async () => {
+  const name = document.getElementById('name-input').value.trim();
+  const phone = document.getElementById('phone-input').value.trim();
+  if (!name || !phone) { alert('Please enter your name and phone number.'); return; }
+
+  const btn = document.getElementById('confirm-btn');
+  btn.disabled = true;
+  btn.textContent = 'Booking...';
+
+  try {
+    const res = await fetch(API + '/api/book', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customer_name: name,
+        customer_phone: phone,
+        service_name: selectedService.name,
+        date: selectedDate,
+        time: selectedTime,
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      alert(err.detail || 'Booking failed. Please try again.');
+      btn.disabled = false;
+      btn.textContent = 'Confirm Booking';
+      return;
+    }
+    const data = await res.json();
+    document.getElementById('confirm-details').innerHTML = `
+      <p>Service: <span>${data.service}</span></p>
+      <p>Date: <span>${data.date}</span></p>
+      <p>Time: <span>${data.time}</span></p>
+      <p>Name: <span>${data.customer_name}</span></p>
+    `;
+    goToStep('step-confirm');
+  } catch (e) {
+    alert('Something went wrong. Please try again.');
+    btn.disabled = false;
+    btn.textContent = 'Confirm Booking';
+  }
+});
+
+loadServices();
+</script>
+</body>
+</html>
