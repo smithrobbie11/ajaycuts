@@ -1,9 +1,9 @@
 from sqlmodel import SQLModel, create_engine, Session
 
-engine = create_engine("sqlite:///barber.db", echo=False)
+engine = create_engine("sqlite:///bookings.db", echo=False)
 
 
-def init_db():
+def create_db():
     SQLModel.metadata.create_all(engine)
 
 
