@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AjayCuts - Book Your Appointment</title>
+<title>CutsByAK - Book Your Appointment</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f0f0f; color: #fff; min-height: 100vh; }
@@ -12,22 +12,22 @@
   .subtitle { text-align: center; color: #888; margin-bottom: 32px; font-size: 0.9rem; }
   .step { display: none; }
   .step.active { display: block; }
-  .step-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; color: #d4af37; }
+  .step-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; color: #ff6600; }
   .service-card { background: #1a1a1a; border: 2px solid #333; border-radius: 12px; padding: 18px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s; }
-  .service-card:hover, .service-card.selected { border-color: #d4af37; background: #1f1a0e; }
+  .service-card:hover, .service-card.selected { border-color: #ff6600; background: #1a0d00; }
   .service-card .name { font-weight: 600; font-size: 1.05rem; }
   .service-card .duration { color: #999; font-size: 0.85rem; margin-top: 4px; }
   input[type="date"], input[type="text"], input[type="tel"] {
     width: 100%; padding: 14px; border-radius: 10px; border: 2px solid #333;
     background: #1a1a1a; color: #fff; font-size: 1rem; margin-bottom: 12px;
   }
-  input:focus { outline: none; border-color: #d4af37; }
+  input:focus { outline: none; border-color: #ff6600; }
   .slots-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
   .slot-btn { padding: 12px 8px; border-radius: 10px; border: 2px solid #333; background: #1a1a1a; color: #fff; font-size: 0.95rem; cursor: pointer; transition: all 0.2s; text-align: center; }
-  .slot-btn:hover, .slot-btn.selected { border-color: #d4af37; background: #1f1a0e; color: #d4af37; }
+  .slot-btn:hover, .slot-btn.selected { border-color: #ff6600; background: #1a0d00; color: #ff6600; }
   .btn { width: 100%; padding: 16px; border-radius: 12px; border: none; font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 12px; }
-  .btn-primary { background: #d4af37; color: #000; }
-  .btn-primary:hover { background: #e5c54a; }
+  .btn-primary { background: #ff6600; color: #000; }
+  .btn-primary:hover { background: #ff8533; }
   .btn-primary:disabled { background: #555; color: #999; cursor: not-allowed; }
   .btn-back { background: transparent; color: #888; border: 1px solid #333; margin-top: 8px; }
   .btn-back:hover { color: #fff; border-color: #666; }
@@ -39,11 +39,14 @@
   .confirmation .details span { color: #fff; font-weight: 600; }
   .no-slots { text-align: center; color: #888; padding: 30px; }
   .loading { text-align: center; color: #888; padding: 20px; }
+  .timing-note { font-size: 0.82rem; color: #aaa; background: #1a1a1a; border-left: 3px solid #ff6600; padding: 10px 12px; border-radius: 6px; margin-bottom: 16px; line-height: 1.4; }
+  .info-section { margin-top: 36px; border-top: 1px solid #222; padding-top: 24px; }
+  .info-section p { font-size: 0.85rem; color: #aaa; background: #1a1a1a; border-left: 3px solid #ff6600; padding: 12px 14px; border-radius: 6px; margin-bottom: 10px; line-height: 1.5; }
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>AJAYCUTS</h1>
+  <h1>CutsByAK</h1>
   <p class="subtitle">Book your appointment</p>
 
   <!-- Step 1: Pick Service -->
@@ -63,6 +66,7 @@
   <!-- Step 3: Pick Time -->
   <div class="step" id="step-time">
     <p class="step-title">Pick a time</p>
+    <p class="timing-note">&#9432; Slots may run slightly longer to accommodate tidying up and any late-running customers.</p>
     <div id="slots-container"></div>
     <button class="btn btn-primary" id="time-next-btn" disabled>Continue</button>
     <button class="btn btn-back" onclick="goToStep('step-date')">Back</button>
@@ -86,6 +90,11 @@
       <div class="details" id="confirm-details"></div>
       <button class="btn btn-primary" onclick="location.reload()">Book Another</button>
     </div>
+  </div>
+
+  <div class="info-section">
+    <p>&#128172; For any questions or problems, please send me a private message via my number or social media.</p>
+    <p>&#128205; Once you have arrived outside, please text me as usual to let me know you're here.</p>
   </div>
 </div>
 
