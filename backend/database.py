@@ -1,6 +1,8 @@
+import os
 from sqlmodel import SQLModel, create_engine, Session
 
-engine = create_engine("sqlite:///bookings.db", echo=False)
+DATABASE_URL = os.environ["DATABASE_URL"]
+engine = create_engine(DATABASE_URL, echo=False)
 
 
 def create_db():
