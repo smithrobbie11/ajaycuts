@@ -7,8 +7,9 @@ END_HOUR = 17
 SLOT_MINUTES = 15
 
 SERVICES = [
-    {"name": "Haircut / Skinfade", "duration": 60, "slots_needed": 4},
-    {"name": "Skin Fade + Beard", "duration": 75, "slots_needed": 5},
-    {"name": "Beard Trim", "duration": 30, "slots_needed": 2},
-    {"name": "Under 16s", "duration": 45, "slots_needed": 3},
+    {"name": "Skin Fade", "duration": 60, "slots_needed": 4, "price": 20},
+    {"name": "Haircut", "duration": 45, "slots_needed": 3, "price": 18},
+    {"name": "Skin Fade + Beard", "duration": 75, "slots_needed": 5, "price": 0},
+    {"name": "Beard Trim", "duration": 30, "slots_needed": 2, "price": 0},
+    {"name": "Under 16s", "duration": 45, "slots_needed": 3, "price": 0},
 ]
