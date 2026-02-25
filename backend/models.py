@@ -12,6 +12,7 @@ class Appointment(SQLModel, table=True):
     start_time: time
     slots_needed: int
     created_at: datetime = Field(default_factory=datetime.utcnow)
+    reminder_sent: bool = Field(default=False)
 
 
 class BlockedSlot(SQLModel, table=True):
