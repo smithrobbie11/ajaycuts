@@ -3,7 +3,6 @@ from datetime import date, timedelta
 
 from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlmodel import Session, select
-from twilio.rest import Client
 
 from backend.database import get_session
 from backend.models import Appointment
@@ -28,6 +27,7 @@ def send_reminders(
         )
     ).all()
 
+    from twilio.rest import Client
     client = Client(os.environ["TWILIO_ACCOUNT_SID"], os.environ["TWILIO_AUTH_TOKEN"])
 
     sent = 0
