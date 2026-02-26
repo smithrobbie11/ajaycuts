@@ -1,4 +1,5 @@
 import os
+import requests
 from datetime import date, timedelta
 
 from fastapi import APIRouter, Depends, Header, HTTPException
@@ -27,20 +28,26 @@ def send_reminders(
         )
     ).all()
 
-    from twilio.rest import Client
-    client = Client(os.environ["TWILIO_ACCOUNT_SID"], os.environ["TWILIO_AUTH_TOKEN"])
+    account_sid = os.environ["TWILIO_ACCOUNT_SID"]
+    auth_token = os.environ["TWILIO_AUTH_TOKEN"]
+    from_number = os.environ["TWILIO_FROM_NUMBER"]
+    url = f"https://api.twilio.com/2010-04-01/Accounts/{account_sid}/Messages.json"
 
     sent = 0
     for appt in appointments:
         try:
-            client.messages.create(
-                body=(
-                    f"Hi {appt.customer_name}, just a reminder that you have a "
-                    f"{appt.service_name} booked for tomorrow at "
-                    f"{appt.start_time.strftime('%H:%M')} with CutsByAK. See you then!"
-                ),
-                from_=os.environ["TWILIO_FROM_NUMBER"],
-                to=appt.customer_phone,
+            requests.post(
+                url,
+                auth=(account_sid, auth_token),
+                data={
+                    "From": from_number,
+                    "To": appt.customer_phone,
+                    "Body": (
+                        f"Hi {appt.customer_name}, just a reminder that you have a "
+                        f"{appt.service_name} booked for tomorrow at "
+                        f"{appt.start_time.strftime('%H:%M')} with CutsByAK. See you then!"
+                    ),
+                },
             )
             appt.reminder_sent = True
             session.add(appt)
