@@ -28,9 +28,9 @@ def send_reminders(
         )
     ).all()
 
-    account_sid = os.environ["TWILIO_ACCOUNT_SID"]
-    auth_token = os.environ["TWILIO_AUTH_TOKEN"]
-    from_number = os.environ["TWILIO_FROM_NUMBER"]
+    account_sid = os.environ["SMS_ACCOUNT_SID"]
+    auth_token = os.environ["SMS_AUTH_TOKEN"]
+    from_number = os.environ["SMS_FROM_NUMBER"]
     url = f"https://api.twilio.com/2010-04-01/Accounts/{account_sid}/Messages.json"
 
     sent = 0
