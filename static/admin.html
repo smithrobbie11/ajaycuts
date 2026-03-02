@@ -137,7 +137,7 @@ async function loadPrices() {
   list.querySelectorAll('.save-price-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       const name = btn.dataset.name;
-      const input = list.querySelector(`input[data-name="${CSS.escape(name)}"]`);
+      const input = btn.closest('.card').querySelector('input[type="number"]');
       const price = parseInt(input.value);
       if (isNaN(price) || price < 0) { alert('Enter a valid price'); return; }
       const res = await fetch(API + `/api/admin/prices/${encodeURIComponent(name)}`, {
