@@ -1,17 +1,16 @@
-from datetime import date, time, timedelta
+from datetime import date, time
 from sqlmodel import Session, select
 
-from backend.config import START_HOUR, END_HOUR, SLOT_MINUTES
+from backend.config import DAY_HOURS, SLOT_MINUTES
 from backend.models import Appointment, BlockedSlot
 
 
-def get_all_slots() -> list[time]:
+def get_all_slots(start_h: int, start_m: int, end_h: int, end_m: int) -> list[time]:
     slots = []
-    hour = START_HOUR
-    minute = 0
-    while hour < END_HOUR or (hour == END_HOUR and minute == 0):
-        if hour == END_HOUR and minute == 0:
-            break
+    hour = start_h
+    minute = start_m
+    end_total = end_h * 60 + end_m
+    while hour * 60 + minute < end_total:
         slots.append(time(hour, minute))
         minute += SLOT_MINUTES
         if minute >= 60:
@@ -28,7 +27,12 @@ def _slot_index(t: time, all_slots: list[time]) -> int:
 
 
 def get_available_slots(target_date: date, slots_needed: int, session: Session) -> list[str]:
-    all_slots = get_all_slots()
+    weekday = target_date.weekday()  # Monday=0, Sunday=6
+    if weekday not in DAY_HOURS:
+        return []
+
+    start_h, start_m, end_h, end_m = DAY_HOURS[weekday]
+    all_slots = get_all_slots(start_h, start_m, end_h, end_m)
 
     # Check if whole day is blocked
     day_blocks = session.exec(
@@ -70,7 +74,6 @@ def get_available_slots(target_date: date, slots_needed: int, session: Session) 
         if i > max_start_index:
             break
 
-        # Check all required consecutive slots
         can_book = True
         for j in range(slots_needed):
             check_idx = i + j

@@ -2,9 +2,18 @@ import os
 
 ADMIN_PIN = os.getenv("ADMIN_PIN", "1234")
 
-START_HOUR = 9
-END_HOUR = 17
 SLOT_MINUTES = 15
+
+# Per-day hours: (start_hour, start_minute, end_hour, end_minute)
+# Monday=0 ... Saturday=5 ; Sunday=6 omitted = unavailable
+DAY_HOURS = {
+    0: (9, 30, 18, 0),   # Monday
+    1: (9, 15, 18, 0),   # Tuesday
+    2: (9, 15, 18, 0),   # Wednesday
+    3: (9, 15, 18, 0),   # Thursday
+    4: (9, 30, 17, 0),   # Friday
+    5: (9,  0, 13, 0),   # Saturday
+}
 
 SERVICES = [
     {"name": "Skin Fade / Taper Fade", "duration": 60, "slots_needed": 4, "price": 20},

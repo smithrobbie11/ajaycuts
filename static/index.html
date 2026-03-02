@@ -65,6 +65,7 @@
     <p class="step-title">Choose a date</p>
     <p style="color:#888;font-size:0.85rem;margin-bottom:8px;">Tap the field below to select a date</p>
     <input type="date" id="date-input">
+    <p id="sunday-warning" style="display:none;color:#ff6600;font-size:0.85rem;margin-bottom:8px;">Sundays are unavailable. Please choose another day.</p>
     <button class="btn btn-primary" id="date-next-btn" disabled>Continue</button>
     <button class="btn btn-back" onclick="goToStep('step-service')">Back</button>
   </div>
@@ -148,8 +149,17 @@ const today = new Date();
 const todayStr = today.toISOString().split('T')[0];
 dateInput.min = todayStr;
 dateInput.addEventListener('change', () => {
-  selectedDate = dateInput.value;
-  document.getElementById('date-next-btn').disabled = !selectedDate;
+  const warning = document.getElementById('sunday-warning');
+  const day = new Date(dateInput.value + 'T00:00:00').getDay(); // 0=Sunday
+  if (day === 0) {
+    warning.style.display = 'block';
+    selectedDate = null;
+    document.getElementById('date-next-btn').disabled = true;
+  } else {
+    warning.style.display = 'none';
+    selectedDate = dateInput.value;
+    document.getElementById('date-next-btn').disabled = !selectedDate;
+  }
 });
 document.getElementById('date-next-btn').addEventListener('click', () => {
   if (selectedDate) loadSlots();
