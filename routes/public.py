@@ -1,12 +1,12 @@
 from datetime import date, time
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from backend.config import SERVICES
 from backend.database import get_session
 from backend.availability import get_available_slots
-from backend.models import Appointment
+from backend.models import Appointment, ServiceConfig
 
 router = APIRouter(prefix="/api")
 
@@ -20,8 +20,9 @@ class BookingRequest(BaseModel):
 
 
 @router.get("/services")
-def list_services():
-    return SERVICES
+def list_services(session: Session = Depends(get_session)):
+    price_map = {sc.name: sc.price for sc in session.exec(select(ServiceConfig)).all()}
+    return [{**svc, "price": price_map.get(svc["name"], svc["price"])} for svc in SERVICES]
 
 
 @router.get("/availability/{target_date}")

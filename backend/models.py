@@ -19,3 +19,8 @@ class BlockedSlot(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     date: date
     time: Optional[str] = None  # "HH:MM" or None for whole day blocked
+
+
+class ServiceConfig(SQLModel, table=True):
+    name: str = Field(primary_key=True)
+    price: int

@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, Header
 from pydantic import BaseModel
 from sqlmodel import Session, select
 
-from backend.config import ADMIN_PIN
+from backend.config import ADMIN_PIN, SERVICES, DAY_HOURS
 from backend.database import get_session
-from backend.models import Appointment, BlockedSlot
+from backend.models import Appointment, BlockedSlot, ServiceConfig
 from backend.availability import get_all_slots
 
 router = APIRouter(prefix="/api/admin")
@@ -24,6 +24,10 @@ class BlockSlotRequest(BaseModel):
 
 class BlockDayRequest(BaseModel):
     date: date
+
+
+class PriceUpdateRequest(BaseModel):
+    price: int
 
 
 @router.get("/appointments")
@@ -147,6 +151,13 @@ def get_blocked(
     session: Session = Depends(get_session),
     _pin: None = Depends(verify_pin),
 ):
+    weekday = target_date.weekday()
+    if weekday in DAY_HOURS:
+        start_h, start_m, end_h, end_m = DAY_HOURS[weekday]
+        all_slots_list = [s.strftime("%H:%M") for s in get_all_slots(start_h, start_m, end_h, end_m)]
+    else:
+        all_slots_list = []
+
     blocks = session.exec(
         select(BlockedSlot).where(BlockedSlot.date == target_date)
     ).all()
@@ -158,5 +169,33 @@ def get_blocked(
         "date": str(target_date),
         "day_blocked": day_blocked,
         "blocked_slots": blocked_slots,
-        "all_slots": [s.strftime("%H:%M") for s in get_all_slots()],
+        "all_slots": all_slots_list,
     }
+
+
+@router.get("/prices")
+def get_prices(
+    session: Session = Depends(get_session),
+    _pin: None = Depends(verify_pin),
+):
+    price_map = {sc.name: sc.price for sc in session.exec(select(ServiceConfig)).all()}
+    return [{"name": svc["name"], "price": price_map.get(svc["name"], svc["price"])} for svc in SERVICES]
+
+
+@router.patch("/prices/{service_name}")
+def update_price(
+    service_name: str,
+    req: PriceUpdateRequest,
+    session: Session = Depends(get_session),
+    _pin: None = Depends(verify_pin),
+):
+    if not any(s["name"] == service_name for s in SERVICES):
+        raise HTTPException(status_code=404, detail="Service not found")
+    existing = session.get(ServiceConfig, service_name)
+    if existing:
+        existing.price = req.price
+        session.add(existing)
+    else:
+        session.add(ServiceConfig(name=service_name, price=req.price))
+    session.commit()
+    return {"status": "updated", "name": service_name, "price": req.price}

@@ -68,6 +68,10 @@
     <!-- Slot Management -->
     <p class="section-title">Slot Management <span style="font-size:0.75rem;color:#888;font-weight:normal;">(tap to toggle block)</span></p>
     <div id="slots-grid" class="slot-grid"></div>
+
+    <!-- Prices -->
+    <p class="section-title">Service Prices</p>
+    <div id="prices-list"></div>
   </div>
 </div>
 
@@ -101,10 +105,52 @@ async function tryLogin(testPin) {
     sessionStorage.setItem('admin_pin', pin);
     document.getElementById('login-screen').classList.remove('active');
     document.getElementById('admin-screen').classList.add('active');
+    loadPrices();
   } else {
     document.getElementById('login-error').style.display = 'block';
     sessionStorage.removeItem('admin_pin');
   }
+}
+
+async function loadPrices() {
+  const res = await fetch(API + '/api/admin/prices', { headers: headers() });
+  const data = await res.json();
+  const list = document.getElementById('prices-list');
+  list.innerHTML = '';
+  data.forEach(svc => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="row">
+        <div class="name">${svc.name}</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="color:#888;">£</span>
+          <input type="number" min="0" value="${svc.price}" data-name="${svc.name}"
+            style="width:72px;padding:6px 10px;border-radius:8px;border:2px solid #333;background:#0f0f0f;color:#fff;font-size:1rem;">
+          <button class="btn btn-gold btn-sm save-price-btn" data-name="${svc.name}">Save</button>
+        </div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+
+  list.querySelectorAll('.save-price-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const name = btn.dataset.name;
+      const input = list.querySelector(`input[data-name="${CSS.escape(name)}"]`);
+      const price = parseInt(input.value);
+      if (isNaN(price) || price < 0) { alert('Enter a valid price'); return; }
+      const res = await fetch(API + `/api/admin/prices/${encodeURIComponent(name)}`, {
+        method: 'PATCH',
+        headers: headers(),
+        body: JSON.stringify({ price }),
+      });
+      if (res.ok) {
+        btn.textContent = 'Saved!';
+        setTimeout(() => btn.textContent = 'Save', 1500);
+      }
+    });
+  });
 }
 
 // Date picker
