@@ -16,7 +16,7 @@ DAY_HOURS = {
 }
 
 SERVICES = [
-    {"name": "Skin Fade + Taper Fade", "duration": 60, "slots_needed": 4, "price": 20},
+    {"name": "Skin Fade - Taper Fade", "duration": 60, "slots_needed": 4, "price": 20},
     {"name": "Haircut", "duration": 45, "slots_needed": 3, "price": 18},
     {"name": "Skin Fade + Beard Trim", "duration": 75, "slots_needed": 5, "price": 25},
     {"name": "Haircut + Beard Trim", "duration": 60, "slots_needed": 4, "price": 25},
